@@ -11,12 +11,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<Map<String, String>> datas = [];
-  int _currentPageIndex = 0;
 
-  @override
   void initState() {
     super.initState();
-    _currentPageIndex = 0;
     datas = [
       {
         "cid": "1",
@@ -101,6 +98,11 @@ class _HomeState extends State<Home> {
     ];
   }
 
+  String calcStringToWon(String priceString) {
+    final oCcy = new NumberFormat("#,###", "ko_KR");
+    return '${oCcy.format(int.parse(priceString))}원';
+  }
+
   AppBar _appbarwidget() {
     return AppBar(
       title: GestureDetector(
@@ -125,11 +127,6 @@ class _HomeState extends State<Home> {
             ))
       ],
     );
-  }
-
-  String calcStringToWon(String priceString) {
-    final oCcy = new NumberFormat("#,###", "ko_KR");
-    return '${oCcy.format(int.parse(priceString))}원';
   }
 
   Widget _bodyWidget() {
@@ -200,45 +197,8 @@ class _HomeState extends State<Home> {
         itemCount: datas.length);
   }
 
-  BottomNavigationBarItem _bottomNavigationBarItem(String iconName, String label) {
-    return BottomNavigationBarItem(
-        icon: Padding(
-          padding: const EdgeInsets.only(bottom: 5),
-          child: SvgPicture.asset(
-            'assets/svg/$iconName.svg',
-            width: 22,
-          ),
-        ),
-        label: label);
-  }
-
-  Widget _bottomNavigationBarWidget() {
-    return BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        onTap: (int index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
-        },
-        currentIndex: _currentPageIndex,
-        selectedItemColor: Colors.black,
-        selectedFontSize: 12,
-        items: [
-          _bottomNavigationBarItem('home_off', '홈'),
-          _bottomNavigationBarItem('notes_off', '동내생활'),
-          _bottomNavigationBarItem('location_off', '내 근처'),
-          _bottomNavigationBarItem('chat_off', '채팅'),
-          _bottomNavigationBarItem('user_off', '나의 당근'),
-        ]);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appbarwidget(),
-      body: _bodyWidget(),
-      bottomNavigationBar: _bottomNavigationBarWidget(),
-      // bottomNavigationBar: Container(),
-    );
+    return Scaffold(appBar: _appbarwidget(), body: _bodyWidget());
   }
 }
