@@ -1,3 +1,4 @@
+import 'package:carrot_market/pages/detail.dart';
 import 'package:carrot_market/repository/contents_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -112,63 +113,74 @@ class _HomeState extends State<Home> {
     return ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         itemBuilder: (BuildContext context, int index) {
-          return Container(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      child: Image.asset(
-                        datas[index]["image"]!,
-                        width: 100,
-                        height: 100,
-                      )),
-                  Expanded(
-                    child: Container(
-                        height: 100,
-                        padding: const EdgeInsets.only(left: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              datas[index]['title']!,
-                              style: TextStyle(fontSize: 15),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              datas[index]['location']!,
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.black.withOpacity(0.3)),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              calcStringToWon(datas[index]['price']!),
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                            Expanded(
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/svg/heart_off.svg',
-                                      width: 13,
-                                      height: 13,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text(datas[index]['likes']!)
-                                  ]),
-                            ),
-                          ],
+          return GestureDetector(
+            onTap: () {
+              print(datas[index]['title']);
+              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+                return DetailContentView(data: datas[index]);
+              }));
+            },
+            child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        child: Hero(
+                          tag: datas[index]["cid"],
+                          child: Image.asset(
+                            datas[index]["image"]!,
+                            width: 100,
+                            height: 100,
+                          ),
                         )),
-                  )
-                ],
-              ));
+                    Expanded(
+                      child: Container(
+                          height: 100,
+                          padding: const EdgeInsets.only(left: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                datas[index]['title']!,
+                                style: TextStyle(fontSize: 15),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                datas[index]['location']!,
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.black.withOpacity(0.3)),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                calcStringToWon(datas[index]['price']!),
+                                style: TextStyle(fontWeight: FontWeight.w500),
+                              ),
+                              Expanded(
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/svg/heart_off.svg',
+                                        width: 13,
+                                        height: 13,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(datas[index]['likes']!)
+                                    ]),
+                              ),
+                            ],
+                          )),
+                    )
+                  ],
+                )),
+          );
         },
         separatorBuilder: (context, index) {
           return Container(height: 1, color: Colors.black);
