@@ -11,7 +11,7 @@ class DetailContentView extends StatefulWidget {
 
 class _DetailContentViewState extends State<DetailContentView> {
   late Size size;
-  late List<String> imgList;
+  late List<Map<String, String>> imgList;
   late int _current;
 
   @override
@@ -20,11 +20,10 @@ class _DetailContentViewState extends State<DetailContentView> {
     _current = 0;
     size = MediaQuery.of(context).size;
     imgList = [
-      widget.data["image"]!,
-      widget.data["image"]!,
-      widget.data["image"]!,
-      widget.data["image"]!,
-      widget.data["image"]!,
+      {"id": "0", "url": widget.data["image"]!},
+      {"id": "1", "url": widget.data["image"]!},
+      {"id": "2", "url": widget.data["image"]!},
+      {"id": "3", "url": widget.data["image"]!},
     ];
   }
 
@@ -34,7 +33,7 @@ class _DetailContentViewState extends State<DetailContentView> {
       extendBodyBehindAppBar: true,
       appBar: _appBarWidget(),
       body: _bodyWidget(),
-      bottomNavigationBar: _bottomNavigationBarWidget(),
+      bottomNavigationBar: SafeArea(child: _bottomNavigationBarWidget()),
     );
   }
 
@@ -68,15 +67,15 @@ class _DetailContentViewState extends State<DetailContentView> {
   }
 
   Widget _bodyWidget() {
-    return Column(
+    return Stack(
       children: [
         Hero(
             tag: widget.data['cid']!,
             child: Container(
                 child: CarouselSlider(
-                    items: imgList.map((url) {
+                    items: imgList.map((img) {
                       return Image.asset(
-                        url,
+                        img["url"]!,
                         width: size.width,
                         fit: BoxFit.fill,
                       );
@@ -92,24 +91,29 @@ class _DetailContentViewState extends State<DetailContentView> {
                           });
                         },
                         viewportFraction: 1)))),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: imgList.asMap().entries.map((entry) {
-            return GestureDetector(
-              // onTap: () => _controller.animateToPage(entry.key),
-              child: Container(
-                width: 12.0,
-                height: 12.0,
-                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: (Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black)
-                        .withOpacity(_current == entry.key ? 0.9 : 0.4)),
-              ),
-            );
-          }).toList(),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: imgList.asMap().entries.map((img) {
+              return GestureDetector(
+                // onTap: () => _controller.animateToPage(entry.key),
+                child: Container(
+                  width: 8.0,
+                  height: 8.0,
+                  margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: (Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.4))
+                          .withOpacity(_current == img.key ? 0.9 : 0.4)),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
