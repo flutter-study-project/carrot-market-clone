@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carrot_market/components/manner_temperature_widget.dart';
 import 'package:flutter/material.dart';
 
 class DetailContentView extends StatefulWidget {
@@ -67,55 +68,63 @@ class _DetailContentViewState extends State<DetailContentView> {
   }
 
   Widget _bodyWidget() {
-    return Stack(
-      children: [
-        Hero(
-            tag: widget.data['cid']!,
-            child: Container(
-                child: CarouselSlider(
-                    items: imgList.map((img) {
-                      return Image.asset(
-                        img["url"]!,
-                        width: size.width,
-                        fit: BoxFit.fill,
-                      );
-                    }).toList(),
-                    options: CarouselOptions(
-                        height: size.width,
-                        initialPage: 0,
-                        enableInfiniteScroll: false,
-                        onPageChanged: (index, reason) {
-                          print(index);
-                          setState(() {
-                            _current = index;
-                          });
-                        },
-                        viewportFraction: 1)))),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: imgList.asMap().entries.map((img) {
-              return GestureDetector(
-                // onTap: () => _controller.animateToPage(entry.key),
-                child: Container(
-                  width: 8.0,
-                  height: 8.0,
-                  margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: (Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.4))
-                          .withOpacity(_current == img.key ? 0.9 : 0.4)),
-                ),
-              );
-            }).toList(),
+    return Column(
+      children: [_makeSliderImage(), _sellerSimpleInfo()],
+    );
+  }
+
+  Widget _makeSliderImage() {
+    return Container(
+      child: Stack(
+        children: [
+          Hero(
+              tag: widget.data['cid']!,
+              child: Container(
+                  child: CarouselSlider(
+                      items: imgList.map((img) {
+                        return Image.asset(
+                          img["url"]!,
+                          width: size.width,
+                          fit: BoxFit.fill,
+                        );
+                      }).toList(),
+                      options: CarouselOptions(
+                          height: size.width,
+                          initialPage: 0,
+                          enableInfiniteScroll: false,
+                          onPageChanged: (index, reason) {
+                            print(index);
+                            setState(() {
+                              _current = index;
+                            });
+                          },
+                          viewportFraction: 1)))),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: imgList.asMap().entries.map((img) {
+                return GestureDetector(
+                  // onTap: () => _controller.animateToPage(entry.key),
+                  child: Container(
+                    width: 8.0,
+                    height: 8.0,
+                    margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.4))
+                            .withOpacity(_current == img.key ? 0.9 : 0.4)),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -124,6 +133,42 @@ class _DetailContentViewState extends State<DetailContentView> {
       width: size.width,
       height: 55,
       color: Colors.red,
+    );
+  }
+
+  Widget _sellerSimpleInfo() {
+    return Padding(
+      padding: const EdgeInsets.all(15),
+      child: Row(children: [
+        // ClipRRect(
+        //   borderRadius: BorderRadius.circular(50),
+        //   child: Container(
+        //     width: 50,
+        //     height: 50,
+        //     child: Image.asset('assets/images/user.png'),
+        //   ),
+        // )
+        CircleAvatar(
+          radius: 25,
+          backgroundImage: Image.asset('assets/images/user.png').image,
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '개발하는 남자',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            Text(
+              '제주시 도남동',
+            ),
+          ],
+        ),
+        Expanded(child: MannerTemerature(MannerTemp: 37.5))
+      ]),
     );
   }
 }
