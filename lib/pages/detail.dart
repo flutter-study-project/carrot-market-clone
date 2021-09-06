@@ -1,6 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carrot_market/components/manner_temperature_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:carrot_market/utils/data_utils.dart';
 
 class DetailContentView extends StatefulWidget {
   Map<String, String> data;
@@ -10,10 +12,35 @@ class DetailContentView extends StatefulWidget {
   _DetailContentViewState createState() => _DetailContentViewState();
 }
 
-class _DetailContentViewState extends State<DetailContentView> {
+class _DetailContentViewState extends State<DetailContentView>
+    with SingleTickerProviderStateMixin {
   late Size size;
   late List<Map<String, String>> imgList;
   late int _current;
+  late double scrollPositionToAlpha = 0;
+  ScrollController _controller = ScrollController();
+  late AnimationController _animationController;
+  late Animation _colorTween;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(vsync: this);
+    _colorTween =
+        ColorTween(begin: Colors.white, end: Colors.black).animate(_animationController);
+    _controller.addListener(() {
+      print(_controller.offset);
+      setState(() {
+        if (_controller.offset < 0) scrollPositionToAlpha = 0;
+        if (_controller.offset > 255)
+          scrollPositionToAlpha = 255;
+        else
+          scrollPositionToAlpha = _controller.offset;
+
+        _animationController.value = scrollPositionToAlpha / 255;
+      });
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -38,16 +65,24 @@ class _DetailContentViewState extends State<DetailContentView> {
     );
   }
 
+  Widget _makeIcon(IconData icon) {
+    return AnimatedBuilder(
+        animation: _colorTween,
+        builder: (context, child) {
+          return Icon(
+            icon,
+            color: _colorTween.value,
+          );
+        });
+  }
+
   // 투명하고, 상단 이미지가 앱바 영역까지 사용함
   AppBar _appBarWidget() {
     return AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white.withAlpha(scrollPositionToAlpha.toInt()),
       elevation: 0,
       leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: Colors.white,
-        ),
+        icon: _makeIcon(Icons.arrow_back),
         onPressed: () {
           Navigator.pop(context);
         },
@@ -55,12 +90,12 @@ class _DetailContentViewState extends State<DetailContentView> {
       actions: [
         IconButton(
           onPressed: () {},
-          icon: Icon(Icons.share),
+          icon: _makeIcon(Icons.share),
           color: Colors.white,
         ),
         IconButton(
           onPressed: () {},
-          icon: Icon(Icons.more_vert),
+          icon: _makeIcon(Icons.more_vert),
           color: Colors.white,
         )
       ],
@@ -68,9 +103,40 @@ class _DetailContentViewState extends State<DetailContentView> {
   }
 
   Widget _bodyWidget() {
-    return Column(
-      children: [_makeSliderImage(), _sellerSimpleInfo()],
-    );
+    return CustomScrollView(controller: _controller, slivers: [
+      SliverList(
+          delegate: SliverChildListDelegate([
+        _makeSliderImage(),
+        _sellerSimpleInfo(),
+        _line(),
+        _contentDetail(),
+        _line(),
+        _otherSellContents()
+      ])),
+      SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10),
+            delegate: SliverChildListDelegate(List.generate(20, (index) {
+              return Container(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(color: Colors.grey, height: 120)),
+                  Text(
+                    '상품 제목',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Text(
+                    '금액',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  )
+                ]),
+              );
+            }).toList()),
+          ))
+    ]);
   }
 
   Widget _makeSliderImage() {
@@ -130,10 +196,62 @@ class _DetailContentViewState extends State<DetailContentView> {
 
   Widget _bottomNavigationBarWidget() {
     return Container(
-      width: size.width,
-      height: 55,
-      color: Colors.red,
-    );
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        width: size.width,
+        height: 55,
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                print('관심상품 이벤트 발생');
+              },
+              child: SvgPicture.asset(
+                "assets/svg/heart_off.svg",
+                width: 25,
+                height: 25,
+              ),
+            ),
+            Container(
+                margin: const EdgeInsets.only(left: 15, right: 10),
+                width: 1,
+                height: 40,
+                color: Colors.grey.withOpacity(0.3)),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(DataUtils.calcStringToWon(widget.data["price"]!),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                Text(
+                  "가격 제안 불가",
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                )
+              ],
+            ),
+            Expanded(
+                child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    print('hi');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Color(0xfff08f4f),
+                    ),
+                    child: Text(
+                      "채팅으로 거래하기",
+                      style: TextStyle(
+                          color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                )
+              ],
+            ))
+          ],
+        ));
   }
 
   Widget _sellerSimpleInfo() {
@@ -169,6 +287,59 @@ class _DetailContentViewState extends State<DetailContentView> {
         ),
         Expanded(child: MannerTemerature(MannerTemp: 37.5))
       ]),
+    );
+  }
+
+  Widget _line() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      height: 1,
+      color: Colors.grey.withOpacity(0.3),
+    );
+  }
+
+  Widget _contentDetail() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: 20),
+          Text(
+            widget.data["title"]!,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          Text(
+            "디지털/가전 22시간 전",
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+          ),
+          SizedBox(height: 15),
+          Text(
+            "선물받은 새상품이고 상품 꺼내보기만 했습니다.",
+            style: TextStyle(height: 1.5, fontSize: 15),
+          ),
+          SizedBox(height: 15),
+          Text(
+            "채팅 3 관심 117 조회 295",
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _otherSellContents() {
+    return Padding(
+      padding: const EdgeInsets.all(15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("판매자님의 판매 상품",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          Text("모두 보기", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 }

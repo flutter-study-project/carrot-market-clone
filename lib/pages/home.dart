@@ -2,7 +2,7 @@ import 'package:carrot_market/pages/detail.dart';
 import 'package:carrot_market/repository/contents_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
+import 'package:carrot_market/utils/data_utils.dart';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -25,12 +25,6 @@ class _HomeState extends State<Home> {
     super.initState();
     currentLocation = "ara";
     contentsRepository = ContentsRepository();
-  }
-
-  String calcStringToWon(String priceString) {
-    if (priceString == "무료나눔") return priceString;
-    final oCcy = new NumberFormat("#,###", "ko_KR");
-    return '${oCcy.format(int.parse(priceString))}원';
   }
 
   AppBar _appbarwidget() {
@@ -158,7 +152,7 @@ class _HomeState extends State<Home> {
                                 height: 5,
                               ),
                               Text(
-                                calcStringToWon(datas[index]['price']!),
+                                DataUtils.calcStringToWon(datas[index]['price']!),
                                 style: TextStyle(fontWeight: FontWeight.w500),
                               ),
                               Expanded(
