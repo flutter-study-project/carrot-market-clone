@@ -21,10 +21,12 @@ class _DetailContentViewState extends State<DetailContentView>
   ScrollController _controller = ScrollController();
   late AnimationController _animationController;
   late Animation _colorTween;
+  bool isMyFavoritContent = false;
 
   @override
   void initState() {
     super.initState();
+    isMyFavoritContent = false;
     _animationController = AnimationController(vsync: this);
     _colorTween =
         ColorTween(begin: Colors.white, end: Colors.black).animate(_animationController);
@@ -203,13 +205,25 @@ class _DetailContentViewState extends State<DetailContentView>
           children: [
             GestureDetector(
               onTap: () {
-                print('관심상품 이벤트 발생');
+                setState(() {
+                  isMyFavoritContent = !isMyFavoritContent;
+                });
+                final snackBar = SnackBar(
+                  duration: Duration(seconds: 1),
+                  content: Text(isMyFavoritContent ? "관심목록에 추가" : "관심목록에서 제거"),
+                );
+
+                // Find the ScaffoldMessenger in the widget tree
+                // and use it to show a SnackBar.
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
               },
               child: SvgPicture.asset(
-                "assets/svg/heart_off.svg",
-                width: 25,
-                height: 25,
-              ),
+                  isMyFavoritContent
+                      ? "assets/svg/heart_on.svg"
+                      : "assets/svg/heart_off.svg",
+                  width: 25,
+                  height: 25,
+                  color: Color(0xfff08f4f)),
             ),
             Container(
                 margin: const EdgeInsets.only(left: 15, right: 10),
@@ -258,14 +272,6 @@ class _DetailContentViewState extends State<DetailContentView>
     return Padding(
       padding: const EdgeInsets.all(15),
       child: Row(children: [
-        // ClipRRect(
-        //   borderRadius: BorderRadius.circular(50),
-        //   child: Container(
-        //     width: 50,
-        //     height: 50,
-        //     child: Image.asset('assets/images/user.png'),
-        //   ),
-        // )
         CircleAvatar(
           radius: 25,
           backgroundImage: Image.asset('assets/images/user.png').image,
