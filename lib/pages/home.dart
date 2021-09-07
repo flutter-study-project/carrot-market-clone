@@ -177,7 +177,7 @@ class _HomeState extends State<Home> {
           );
         },
         separatorBuilder: (context, index) {
-          return Container(height: 1, color: Colors.black);
+          return Container(height: 1, color: Colors.grey.withOpacity(0.3));
         },
         itemCount: datas.length);
   }

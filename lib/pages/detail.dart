@@ -1,9 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carrot_market/components/manner_temperature_widget.dart';
+import 'package:carrot_market/repository/contents_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:carrot_market/utils/data_utils.dart';
 
+// ignore: must_be_immutable
 class DetailContentView extends StatefulWidget {
   Map<String, String> data;
   DetailContentView({Key? key, required this.data}) : super(key: key);
@@ -14,6 +16,7 @@ class DetailContentView extends StatefulWidget {
 
 class _DetailContentViewState extends State<DetailContentView>
     with SingleTickerProviderStateMixin {
+  late ContentsRepository contentsRepository;
   late Size size;
   late List<Map<String, String>> imgList;
   late int _current;
@@ -26,6 +29,7 @@ class _DetailContentViewState extends State<DetailContentView>
   @override
   void initState() {
     super.initState();
+    contentsRepository = ContentsRepository();
     isMyFavoritContent = false;
     _animationController = AnimationController(vsync: this);
     _colorTween =
@@ -41,6 +45,14 @@ class _DetailContentViewState extends State<DetailContentView>
 
         _animationController.value = scrollPositionToAlpha / 255;
       });
+    });
+    _loadMyFavoriteContentState();
+  }
+
+  _loadMyFavoriteContentState() async {
+    bool ck = await contentsRepository.isMyFavoriteContents(widget.data["cid"]!);
+    setState(() {
+      isMyFavoritContent = ck;
     });
   }
 
@@ -204,10 +216,15 @@ class _DetailContentViewState extends State<DetailContentView>
         child: Row(
           children: [
             GestureDetector(
-              onTap: () {
+              onTap: () async {
+                isMyFavoritContent
+                    ? await contentsRepository
+                        .deleteMyFavoriteContent(widget.data["cid"]!) // 제거
+                    : await contentsRepository.addMyFavoriteContent(widget.data); // 추가
                 setState(() {
                   isMyFavoritContent = !isMyFavoritContent;
                 });
+
                 final snackBar = SnackBar(
                   duration: Duration(seconds: 1),
                   content: Text(isMyFavoritContent ? "관심목록에 추가" : "관심목록에서 제거"),
